@@ -12,10 +12,16 @@ If that's good enough for you, by all means, use it. Otherwise, read on.
 
 ### Requirements
 
-- Only tested on RHEL 7 and Fedora 22
-- No special packages needed; only standard library (python) modules used
-- Will not work on RHEL 6 with standard python 2.6.6 but would probably work just fine with python 2.7 from [RHSCL](https://access.redhat.com/solutions/472793)
-
+- Requires Python 2.7
+- Fails on RHEL 7 (use `grub2-mkpasswd-pbkdf2` method above)
+- Tested on Fedora 22: no special packages needed (only standard library [python] modules used)
+- Tested on RHEL 6 with python 2.7 from [RHSCL](https://access.redhat.com/solutions/472793)
+    1. Enable the SCL repo (e.g., `subscription-manager repos --enable rhel-server-rhscl-6-rpms`)
+    1. Install python 2.7 (i.e., `yum install python27`)
+    1. Save `burg2-mkpasswd-pbkdf2` to somewhere in `PATH`
+    1. Execute `scl enable python27 -- burg2-mkpasswd-pbkdf2`
+    1. Optionally create a shell-script wrapper or alias to avoid typing that every time
+    
 ### Passphrases
 
 - Can read passphrase from 1st line of stdin
@@ -44,6 +50,6 @@ optional arguments:
   -0, --pass-stdin      The first line of standard input is the passphrase
   -d, --debug           Enable some debugging (PRINTS PASSPHRASE TO STDERR)
 
-Version info: burg2-mkpasswd-pbkdf2 v0.0.1 last mod 2015/09/10
+Version info: burg2-mkpasswd-pbkdf2 v0.0.2 last mod 2015/09/10
 bugs/RFEs: github.com/ryran/burg2-mkpasswd-pbkdf2 or rsaw@redhat.com
 ```

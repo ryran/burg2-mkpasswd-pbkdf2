@@ -1,14 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+import argparse
 from hashlib import pbkdf2_hmac
 from os import urandom
 from sys import stdin, stderr, exit as sysexit
 from binascii import hexlify
-import argparse
 
 vers = {}
-vers['version'] = '0.0.1'
+vers['version'] = '0.0.2'
 vers['date'] = '2015/09/10'
 doDebug = False
 
