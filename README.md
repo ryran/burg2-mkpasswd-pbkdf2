@@ -12,15 +12,14 @@ If that's good enough for you, by all means, use it. Otherwise, read on.
 
 ### Requirements
 
-- Only tested on RHEL 7 and Fedora 22; will not work on RHEL 6 with standard python 2.6.6
+- Only tested on RHEL 7 and Fedora 22
 - No special packages needed; only standard library (python) modules used
+- Will not work on RHEL 6 with standard python 2.6.6 but would probably work just fine with python 2.7 from [RHSCL](https://access.redhat.com/solutions/472793)
 
 ### Passphrases
 
 - Can read passphrase from 1st line of stdin
-
 - Can read passphrase from cmdline argument
-
 - Can read passphrase from 1st line of filename
 
 ### Help page
