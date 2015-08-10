@@ -8,7 +8,7 @@ from sys import stdin, stderr, exit as sysexit
 from binascii import hexlify
 
 vers = {}
-vers['version'] = '0.0.2'
+vers['version'] = '0.0.3'
 vers['date'] = '2015/09/10'
 doDebug = False
 
@@ -18,9 +18,13 @@ def debug(obj):
 
 def grub2_mkpasswd_pbkdf2(passphrase, iterCount=100000, saltLength=64, doDebug=False):
     algo = 'sha512'
-    binSalt = urandom(saltLength)
-    hexSalt = hexlify(binSalt)
-    passHash = hexlify(pbkdf2_hmac(algo, passphrase, binSalt, iterCount))
+    try:
+        binSalt = urandom(saltLength)
+        hexSalt = hexlify(binSalt)
+        passHash = hexlify(pbkdf2_hmac(algo, passphrase, binSalt, iterCount))
+    except:
+        print("Unexpected error generating hash!\n", file=stderr)
+        raise
     if debug:
         debug("algo = '{}'".format(algo))
         debug("iterCount = '{}'".format(iterCount))
@@ -89,7 +93,7 @@ def main():
             print("Error({}): {}".format(e.errno, e.strerror))
             sysexit(1)
         except:
-            print("Unexpected error", file=stderr)
+            print("Unexpected error\n", file=stderr)
             raise
     elif opts.pass_stdin:
         debug("Reading pass from stdin")

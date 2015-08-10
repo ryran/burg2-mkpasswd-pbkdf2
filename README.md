@@ -49,7 +49,4 @@ optional arguments:
                         The first line of FILE is the passphrase
   -0, --pass-stdin      The first line of standard input is the passphrase
   -d, --debug           Enable some debugging (PRINTS PASSPHRASE TO STDERR)
-
-Version info: burg2-mkpasswd-pbkdf2 v0.0.2 last mod 2015/09/10
-bugs/RFEs: github.com/ryran/burg2-mkpasswd-pbkdf2 or rsaw@redhat.com
 ```
