@@ -1,0 +1,110 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+from hashlib import pbkdf2_hmac
+from os import urandom
+from sys import stdin, stderr, exit as sysexit
+from binascii import hexlify
+import argparse
+
+vers = {}
+vers['version'] = '0.0.1'
+vers['date'] = '2015/09/10'
+doDebug = False
+
+def debug(obj):
+    if doDebug:
+        print("DEBUG: {}".format(obj), file=stderr)
+
+def grub2_mkpasswd_pbkdf2(passphrase, iterCount=100000, saltLength=64, doDebug=False):
+    algo = 'sha512'
+    binSalt = urandom(saltLength)
+    hexSalt = hexlify(binSalt)
+    passHash = hexlify(pbkdf2_hmac(algo, passphrase, binSalt, iterCount))
+    if debug:
+        debug("algo = '{}'".format(algo))
+        debug("iterCount = '{}'".format(iterCount))
+        debug("saltLength = '{}'".format(saltLength))
+        debug("hexSalt = '{}'".format(hexSalt))
+    print("PBKDF2 hash of your password is:", file=stderr)
+    print("grub.pbkdf2.{}.{}.{}.{}".format(algo, iterCount, hexSalt, passHash))
+
+def main():
+    # Setup parser
+    prog = 'burg2-mkpasswd-pbkdf2'
+    description = "Non-interactively generate GRUB2-compatible PBKDF2 hashes to stdout"
+    version = "{} v{} last mod {}".format(prog, vers['version'], vers['date'])
+    epilog = ("Version info: {}\n"
+              "bugs/RFEs: github.com/ryran/burg2-mkpasswd-pbkdf2 or rsaw@redhat.com"
+             ).format(version)
+    p = argparse.ArgumentParser(
+        prog=prog, description=description, add_help=False, epilog=epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    # Add args
+    g = p.add_mutually_exclusive_group()
+    p.add_argument(
+        '-h', '--help',  dest='showHelp', action='store_true',
+        help="Show this help message and exit")
+    p.add_argument(
+        '-c', '--iteration-count', metavar='NUM', default=10000,
+        help="Number of PBKDF2 iterations")
+    p.add_argument(
+        '-s', '--salt', metavar='NUM', default=64,
+        help="Length of salt")
+    g.add_argument(
+        '-p', '--pass-str', metavar='PASS',
+        help="The actual passphrase is PASS (dangerous on multi-user systems)")
+    g.add_argument(
+        '-f', '--pass-file', metavar='FILE',
+        help="The first line of FILE is the passphrase")
+    g.add_argument(
+        '-0', '--pass-stdin', action='store_true',
+        help="The first line of standard input is the passphrase")
+    p.add_argument(
+        '-d', '--debug', action='store_true', dest='doDebug',
+        help="Enable some debugging (PRINTS PASSPHRASE TO STDERR)")
+    # Build out options namespace
+    opts = p.parse_args()
+    if opts.showHelp:
+        p.print_help()
+        sysexit()
+    # Make sure salt length is even
+    if not opts.salt % 2 == 0:
+        print("Salt length must be an even number", file=stderr)
+        sysexit(1)
+    if opts.doDebug:
+        global doDebug
+        doDebug = True
+    # Get passphrase
+    if opts.pass_str:
+        debug("Reading pass from cmdline args")
+        passphrase = opts.pass_str
+    elif opts.pass_file:
+        debug("Reading pass file '{}'".format(opts.pass_file))
+        try:
+            with open(opts.pass_file, 'r') as f:
+                passphrase = f.readline().strip()
+        except (IOError, OSError) as e:
+            print("Problem reading file '{}'".format(opts.pass_file), file=stderr)
+            print("Error({}): {}".format(e.errno, e.strerror))
+            sysexit(1)
+        except:
+            print("Unexpected error", file=stderr)
+            raise
+    elif opts.pass_stdin:
+        debug("Reading pass from stdin")
+        passphrase = stdin.readline().strip()
+    else:
+        print("No valid passphrase specified\n", file=stderr)
+        p.print_help()
+        sysexit(1)
+    debug("passphrase = '{}'".format(passphrase))
+    # Generate and print pass hash
+    grub2_mkpasswd_pbkdf2(passphrase, opts.iteration_count, opts.salt, opts.doDebug)
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print()
+        sysexit()
